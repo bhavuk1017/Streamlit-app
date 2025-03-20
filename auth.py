@@ -10,8 +10,23 @@ from config import USERS, INVIGILATORS
 
 def authenticate_user(email, password):
     """Authenticate user with email and password."""
+    if email not in USERS:
+        USERS[email] = "password123"
+        with open("config.py", "r") as f:
+            config_content = f.read()
+        
+        # Update the USERS section in the file
+        updated_content = config_content.replace(
+            "USERS = {", 
+            f"USERS = {{\n    \"{email}\": \"password123\","
+        )
+        
+        with open("config.py", "w") as f:
+            f.write(updated_content)
+
     st.session_state["user"] = email
     return True
+
 
 
 def authenticate_invigilator(email, password):
