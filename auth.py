@@ -1,12 +1,18 @@
 import streamlit as st
 from config import USERS, INVIGILATORS
 
+# def authenticate_user(email, password):
+#     """Authenticate user with email and password."""
+#     if email in USERS and USERS[email] == password:
+#         st.session_state["user"] = email
+#         return True
+#     return False
+
 def authenticate_user(email, password):
     """Authenticate user with email and password."""
-    if email in USERS and USERS[email] == password:
-        st.session_state["user"] = email
-        return True
-    return False
+    st.session_state["user"] = email
+    return True
+
 
 def authenticate_invigilator(email, password):
     """Authenticate invigilator with email and password."""
