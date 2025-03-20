@@ -52,8 +52,9 @@ def save_test_result_endpoint():
     return jsonify({"success": True})
 
 # Run Flask in a separate thread
+port = int(os.environ.get("PORT", 0))
 def run_flask():
-    flask_app.run(port=5002)
+    flask_app.run(host='0.0.0.0', port=port)
 
 # Start Flask server in background
 threading.Thread(target=run_flask, daemon=True).start()
