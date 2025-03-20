@@ -84,7 +84,7 @@ if page == "User Dashboard":
         # Skill Selection and Guidelines
         st.subheader("Select Skill and View Guidelines")
         skill = st.text_input("Enter a Skill:")
-        if st.button("Generate Guidelines")
+        if st.button("Generate Guidelines"):
             if skill:
                 # Generate Guidelines
                 guidelines_prompt = f"""
