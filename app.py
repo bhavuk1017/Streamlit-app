@@ -122,7 +122,7 @@ if page == "User Dashboard":
                         formatted_time = preferred_time.strftime("%H:%M")
                        
                         # Construct the React app URL with skill, email, and date
-                        react_url = f"http://localhost:3000/test?skill={skill}&email={email}&testDate={formatted_date}&testTime={formatted_time}"
+                        react_url = f"http://proctoringfrontend.netlify.app/test?skill={skill}&email={email}&testDate={formatted_date}&testTime={formatted_time}"
                         
                         # Format the date for the email
                         formatted_date1 = preferred_date.strftime("%A, %B %d, %Y")
