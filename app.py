@@ -84,22 +84,22 @@ if page == "User Dashboard":
         # Skill Selection and Guidelines
         st.subheader("Select Skill and View Guidelines")
         skill = st.text_input("Enter a Skill:")
-        
-        if skill:
-            # Generate Guidelines
-            guidelines_prompt = f"""
-            Generate comprehensive guidelines for certification in {skill}. Include:
-            1. Prerequisites and requirements
-            2. Learning objectives
-            3. Evaluation criteria
-            4. Recommended preparation
-            5. Important topics to focus on
-            """
-            guidelines = generate_ai_response(guidelines_prompt)
+        if st.button("Generate Guidelines")
+            if skill:
+                # Generate Guidelines
+                guidelines_prompt = f"""
+                Generate comprehensive guidelines for certification in {skill}. Include:
+                1. Prerequisites and requirements
+                2. Learning objectives
+                3. Evaluation criteria
+                4. Recommended preparation
+                5. Important topics to focus on
+                """
+                guidelines = generate_ai_response(guidelines_prompt)
+                
+                with st.expander("View Skill Guidelines", expanded=True):
+                    st.write(guidelines)
             
-            with st.expander("View Skill Guidelines", expanded=True):
-                st.write(guidelines)
-        
         # Test Generation Section
         if skill:
             st.subheader("Generate Test")
