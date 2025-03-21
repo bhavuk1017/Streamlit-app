@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import hashlib
-import os
+
 
 from config import SKILLS
 from auth import (
@@ -53,7 +53,7 @@ def save_test_result_endpoint():
     return jsonify({"success": True})
 
 # Run Flask in a separate thread
-port = int(os.environ.get("PORT", 0))
+port = 6000
 def run_flask():
     flask_app.run(host='0.0.0.0', port=port)
 
