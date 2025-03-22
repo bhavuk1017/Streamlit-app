@@ -106,7 +106,7 @@ if page == "User Dashboard":
         if skill:
             st.subheader("Generate Test")
             # Add date picker for preferred test date
-            min_date = datetime.today() + timedelta(days=1)
+            min_date = datetime.today()
             max_date = datetime.today() + timedelta(days=30)
             preferred_date = st.date_input(
                 "Select your preferred test date:",
