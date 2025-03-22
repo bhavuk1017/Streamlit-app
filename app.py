@@ -114,7 +114,7 @@ if page == "User Dashboard":
                 max_value=max_date,
                 value=min_date
             )
-            preferred_time = st.time_input("Select your preferred test time:", min_value=min_date.time(), max_value=max_date.time())
+            preferred_time = st.time_input("Select your preferred test time:")
 
                             
             if st.button("Generate Test"):
