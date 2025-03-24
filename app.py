@@ -173,7 +173,8 @@ if page == "User Dashboard":
                     }
                     
                     tasks_collection.insert_one(task_data)  # Save task to MongoDB
-                    
+                    send_email(email, "Your Certification Task", task_details)  # Send task details to user
+                    send_email(invigilator_email, "Observation Sheet", obs_sheet)  # Send observation sheet to invigilator
                     deadline_line = task_details.split("\n")[1].strip()
                     st.success(f"Task assigned and emails sent! {deadline_line}")
 
