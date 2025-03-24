@@ -13,3 +13,5 @@ SpeechRecognition>=3.8.1
 flask>=2.0.0
 flask-cors>=3.0.0
 pymongo>=3.12.0
+gunicorn==21.2.0
+

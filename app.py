@@ -50,14 +50,15 @@ def save_test_result_endpoint():
         handle_test_completion(email, skill, score)
     
     return jsonify({"success": True})
+    pass
 
 # Run Flask in a separate thread
-port = 6000
-def run_flask():
-    flask_app.run(host='0.0.0.0', port=port)
+# port = 6000
+# def run_flask():
+#     flask_app.run(host='0.0.0.0', port=port)
 
-# Start Flask server in background
-threading.Thread(target=run_flask, daemon=True).start()
+# # Start Flask server in background
+# threading.Thread(target=run_flask, daemon=True).start()
 
 # Page setup
 st.set_page_config(page_title="Certification Platform", layout="wide")
