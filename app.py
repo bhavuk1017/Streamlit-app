@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import hashlib
 
-
+from database import tasks_collection,submissions_collection
 
 from auth import (
     authenticate_user,
@@ -23,8 +23,7 @@ from task_manager import (
     assign_task,
     handle_submission
 )
-from utils import load_json, generate_ai_response
-from config import TASKS_FILE, INVIGILATORS
+from utils import generate_ai_response
 from email_service import send_email
 
 from flask import Flask, request, jsonify
@@ -160,15 +159,25 @@ if page == "User Dashboard":
         # Task Generation Section
         if skill:
             st.subheader("Generate Task")
-            invigilator = st.selectbox("Select Invigilator:", list(INVIGILATORS.keys()))
+            invigilator_email = st.text_input("Enter Invigilator Email:")
             if st.button("Generate Task"):
                 with st.spinner("Generating Task & Guidelines..."):
                     task_details, obs_sheet = generate_task(skill)
-                    assign_task(email, task_details, obs_sheet, invigilator)
                     
-                    # Extract deadline from task details to show in success message
+                    task_data = {
+                        "email": email,
+                        "task": task_details,
+                        "invigilator_email": invigilator_email,
+                        "observation_sheet": obs_sheet,
+                        "created_at": datetime.now()
+                    }
+                    
+                    tasks_collection.insert_one(task_data)  # Save task to MongoDB
+                    
                     deadline_line = task_details.split("\n")[1].strip()
                     st.success(f"Task assigned and emails sent! {deadline_line}")
+
+            
 
 elif page == "Invigilator Dashboard":
     st.header("Invigilator Dashboard")
@@ -186,42 +195,40 @@ elif page == "Invigilator Dashboard":
     
     # Invigilator Dashboard Content
     if is_invigilator_authenticated():
-        current_invigilator_email = st.session_state["invigilator"]
+        current_invigilator_email = get_current_user()
         
         # Show Pending Tasks
         st.subheader("Pending Tasks")
-        pending_tasks = load_json(TASKS_FILE)
-        has_pending = False
+        pending_tasks_cursor = tasks_collection.find({"invigilator_email": current_invigilator_email})
         
-        for user_email, tasks in pending_tasks.items():
-            for task in tasks:
-                if task["invigilator"] in INVIGILATORS and INVIGILATORS[task["invigilator"]]["email"] == current_invigilator_email:
-                    has_pending = True
-                    with st.expander(f"Pending - User: {user_email}, Task: {task['task'][:50]}..."):
-                        st.write(f"Task: {task['task']}")
-                        st.write(f"Observation Sheet: {task['observation_sheet']}")
+        has_pending_tasks = False
         
-        if not has_pending:
+        for task in pending_tasks_cursor:
+            has_pending_tasks = True
+            with st.expander(f"Pending Task: {task['task'][:50]}..."):
+                st.write(f"Task: {task['task']}")
+                st.write(f"Observation Sheet: {task['observation_sheet']}")
+        
+        if not has_pending_tasks:
             st.info("No pending tasks assigned to you.")
         
         # Show Submitted Tasks
         st.subheader("Submitted Tasks")
-        submissions = load_json("submissions.json")
+        submitted_tasks_cursor = submissions_collection.find({"invigilator_email": current_invigilator_email})
         
-        for user_email, tasks in submissions.items():
-            for idx, task_info in enumerate(tasks):
-                task_hash = hashlib.md5(task_info['task'].encode()).hexdigest()[:8]
-                button_key = f"certify_{user_email}_{task_hash}_{idx}"
+        for submission in submitted_tasks_cursor:
+            task_hash = hashlib.md5(submission['task'].encode()).hexdigest()[:8]
+            button_key = f"certify_{submission['email']}_{task_hash}"
+            
+            with st.expander(f"Completed - User: {submission['email']}, Task: {submission['task'][:50]}..."):
+                st.write(f"Task: {submission['task']}")
+                st.write(f"Evaluation Result: {submission['evaluation']}")
                 
-                with st.expander(f"Completed - User: {user_email}, Task: {task_info['task'][:50]}..."):
-                    st.write(f"Task: {task_info['task']}")
-                    st.write(f"Evaluation Result: {task_info['evaluation']}")
-                    
-                    if st.button("Generate Certificate", key=button_key):
-                        cert_prompt = f"Generate a professional certification document for {user_email} for completing the task: {task_info['task']}."
-                        certificate = generate_ai_response(cert_prompt)
-                        send_email(user_email, "Certification Achieved!", certificate)
-                        st.success("Certificate sent to user!")
+                if st.button("Generate Certificate", key=button_key):
+                    cert_prompt = f"Generate a professional certification document for {submission['email']} for completing the task: {submission['task']}."
+                    certificate = generate_ai_response(cert_prompt)
+                    send_email(submission["email"], "Certification Achieved!", certificate)
+                    st.success("Certificate sent to user!")
 
 elif page == "Pending Tasks":
     st.header("Pending Tasks")
@@ -242,27 +249,22 @@ elif page == "Pending Tasks":
         email = get_current_user()
         st.subheader(f"Pending Tasks for {email}")
         
-        pending_tasks = load_json(TASKS_FILE)
-        if email in pending_tasks and pending_tasks[email]:
-            for task_info in pending_tasks[email]:
-                with st.expander(f"Task: {task_info['task'][:50]}..."):
-                    st.write(task_info["task"])
+        pending_tasks_cursor = tasks_collection.find({"email": email})
+    
+        for task in pending_tasks_cursor:
+            with st.expander(f"Task: {task['task'][:50]}..."):
+                deadline_line = task["task"].split("\n")[1].strip()
+                uploaded_file = st.file_uploader(
+                    "Upload Code/Video Submission",
+                    type=["txt", "mp4", "avi", "mov"],
+                    key=f"submission_{task['_id']}"
+                )   
+            
                     
-                    # Check if task has a deadline
-                    if "TASK DEADLINE:" in task_info["task"]:
-                        deadline_line = task_info["task"].split("\n")[1].strip()
-                        st.warning(deadline_line)
-                    
-                    uploaded_file = st.file_uploader(
-                        "Upload Code/Video Submission",
-                        type=["txt", "mp4", "avi", "mov"],
-                        key=f"submission_{task_info['task']}"
-                    )
-                    
-                    if uploaded_file:
-                        with st.spinner("Processing submission..."):
-                            if handle_submission(email, uploaded_file, task_info):
-                                st.success("Task evaluated!")
+                if uploaded_file:
+                    with st.spinner("Processing submission..."):
+                        if handle_submission(email, uploaded_file, task):
+                            st.success("Task evaluated!")
         else:
             st.info("No pending tasks found.")
 
