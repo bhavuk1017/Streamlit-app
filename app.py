@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import hashlib
 
 
-from config import SKILLS
+
 from auth import (
     authenticate_user,
     authenticate_invigilator,
