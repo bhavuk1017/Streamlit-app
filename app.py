@@ -253,7 +253,7 @@ elif page == "Pending Tasks":
     
         for task in pending_tasks_cursor:
             with st.expander(f"Task: {task['task'][:50]}..."):
-                task=task[task]
+                st.write(task['task'])
                 deadline_line = task["task"].split("\n")[1].strip()
                 uploaded_file = st.file_uploader(
                     "Upload Code/Video Submission",
