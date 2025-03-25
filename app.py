@@ -26,31 +26,31 @@ from task_manager import (
 from utils import generate_ai_response
 from email_service import send_email
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import threading
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# import threading
 
-# Create a Flask server to receive test results from React
-flask_app = Flask(__name__)
-CORS(flask_app)
+# # Create a Flask server to receive test results from React
+# flask_app = Flask(__name__)
+# CORS(flask_app)
 
-@flask_app.route('/save_test_result', methods=['POST'])
-def save_test_result_endpoint():
-    data = request.json
-    email = data.get('email')
-    skill = data.get('skill')
-    score = data.get('score')
-    feedback = data.get('feedback')
+# @flask_app.route('/save_test_result', methods=['POST'])
+# def save_test_result_endpoint():
+#     data = request.json
+#     email = data.get('email')
+#     skill = data.get('skill')
+#     score = data.get('score')
+#     feedback = data.get('feedback')
     
-    # Use your existing function to save results
-    save_test_result(email, skill, score, feedback)
+#     # Use your existing function to save results
+#     save_test_result(email, skill, score, feedback)
     
-    # Handle certification if passed
-    if score >= 5:
-        handle_test_completion(email, skill, score)
+#     # Handle certification if passed
+#     if score >= 5:
+#         handle_test_completion(email, skill, score)
     
-    return jsonify({"success": True})
-    pass
+#     return jsonify({"success": True})
+  
 
 # Run Flask in a separate thread
 # port = 6000
