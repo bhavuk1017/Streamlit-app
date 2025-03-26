@@ -9,8 +9,10 @@ from auth import (
     authenticate_invigilator,
     is_user_authenticated,
     is_invigilator_authenticated,
-    get_current_user
-)
+    get_current_user,
+    get_current_invigilator,
+    logout_user,
+    register_user)
 from test_manager import (
     generate_test,
     evaluate_test_answers,
@@ -70,19 +72,32 @@ if page == "User Dashboard":
     
     # User Authentication
     if not is_user_authenticated():
-        email = st.text_input("Enter your email")
-        password = st.text_input("Enter your password", type="password")
-        
-        if st.button("Login as User"):
-            if authenticate_user(email, password):
-                st.success("User logged in!")
-            else:
-                st.error("Invalid credentials")
-    
+        auth_option = st.radio("Choose an option", ["Login", "Register"])
+        if auth_option=="Login":
+            email = st.text_input("Enter your email")
+            password = st.text_input("Enter your password", type="password")
+            
+            if st.button("Login as User"):
+                if authenticate_user(email, password):
+                    st.success("User logged in!")
+                else:
+                    st.error("Invalid credentials")
+        else:
+            email = st.text_input("Enter your email")
+            password = st.text_input("Enter your password", type="password")
+            name = st.text_input("Enter your name")
+            if st.button("Register"):
+                if register_user(email, password, name):
+                    st.success("User registered successfully! Please log in.")
+                else:
+                    st.error("Registration failed. Email may already be in use.")
     # Main Dashboard Content
     if is_user_authenticated():
         email = get_current_user()
-        
+        if st.button("Logout"):
+            logout_user()
+            st.success("Logged out successfully!")
+            st.experimental_rerun()
         # Skill Selection and Guidelines
         st.subheader("Select Skill and View Guidelines")
         skill = st.text_input("Enter a Skill:")

@@ -64,6 +64,7 @@
 
 import streamlit as st
 from database import users_collection, invigilators_collection
+from pymongo.errors import DuplicateKeyError
 
 def authenticate_user(email, password):
     """Authenticate a user with email and password."""
@@ -103,6 +104,25 @@ def get_invigilator_name_by_email(email):
     """Get invigilator name from email."""
     invigilator = invigilators_collection.find_one({"email": email})
     return invigilator.get("name") if invigilator else None
+
+def register_user(email, password, name):
+    """Register a new user."""
+    try:
+        users_collection.insert_one({
+            "email": email,
+            "password": password,
+            "name": name
+        })
+        return True
+    except DuplicateKeyError:
+        return False
+
+def logout_user():
+    """Log out the current user."""
+    if "authenticated" in st.session_state:
+        del st.session_state["authenticated"]
+    if "user" in st.session_state:
+        del st.session_state["user"]
 
 
 
