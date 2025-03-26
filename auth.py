@@ -123,6 +123,11 @@ def logout_user():
         del st.session_state["authenticated"]
     if "user" in st.session_state:
         del st.session_state["user"]
+def get_all_invigilators():
+    """Get a list of all available invigilators."""
+    invigilators = invigilators_collection.find({}, {"email": 1, "name": 1})
+    return list(invigilators)
+
 
 
 

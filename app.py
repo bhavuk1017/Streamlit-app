@@ -12,7 +12,8 @@ from auth import (
     get_current_user,
     get_current_invigilator,
     logout_user,
-    register_user)
+    register_user,
+    get_all_invigilators)
 from test_manager import (
     generate_test,
     evaluate_test_answers,
@@ -175,24 +176,37 @@ if page == "User Dashboard":
         # Task Generation Section
         if skill:
             st.subheader("Generate Task")
-            invigilator_email = st.text_input("Enter Invigilator Email:")
-            if st.button("Generate Task"):
-                with st.spinner("Generating Task & Guidelines..."):
-                    task_details, obs_sheet = generate_task(skill)
-                    
-                    task_data = {
-                        "email": email,
-                        "task": task_details,
-                        "invigilator_email": invigilator_email,
-                        "observation_sheet": obs_sheet,
-                        "created_at": datetime.now()
-                    }
-                    
-                    tasks_collection.insert_one(task_data)  # Save task to MongoDB
-                    send_email(email, "Your Certification Task", task_details)  # Send task details to user
-                    send_email(invigilator_email, "Observation Sheet", obs_sheet)  # Send observation sheet to invigilator
-                    deadline_line = task_details.split("\n")[1].strip()
-                    st.success(f"Task assigned and emails sent! {deadline_line}")
+            invigilators = get_all_invigilators()
+            if invigilators:
+                # Create a list of options with name and email
+                invigilator_options = [f"{inv.get('name', 'Unknown')} ({inv['email']})" for inv in invigilators]
+                
+                # Add a dropdown to select invigilator
+                selected_invigilator = st.selectbox(
+                    "Select an Invigilator:",
+                    options=invigilator_options
+                )
+        
+        # Extract email from the selected option
+                if selected_invigilator:
+                    invigilator_email = selected_invigilator.split('(')[1].split(')')[0]
+                if st.button("Generate Task"):
+                    with st.spinner("Generating Task & Guidelines..."):
+                        task_details, obs_sheet = generate_task(skill)
+                        
+                        task_data = {
+                            "email": email,
+                            "task": task_details,
+                            "invigilator_email": invigilator_email,
+                            "observation_sheet": obs_sheet,
+                            "created_at": datetime.now()
+                        }
+                        
+                        tasks_collection.insert_one(task_data)  # Save task to MongoDB
+                        send_email(email, "Your Certification Task", task_details)  # Send task details to user
+                        send_email(invigilator_email, "Observation Sheet", obs_sheet)  # Send observation sheet to invigilator
+                        deadline_line = task_details.split("\n")[1].strip()
+                        st.success(f"Task assigned and emails sent! {deadline_line}")
 
             
 
