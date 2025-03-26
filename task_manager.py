@@ -510,7 +510,8 @@ def handle_submission(email, uploaded_file, task_info):
             "email": email,
             "task": task_info["task"],
             "evaluation": evaluation_result,
-            "submitted_at": datetime.now()
+            "submitted_at": datetime.now(),
+            "invigilator_email": task_info["invigilator_email"]
         }
         
         submissions_collection.insert_one(submission_data)
