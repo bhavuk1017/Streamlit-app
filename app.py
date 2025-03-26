@@ -98,7 +98,7 @@ if page == "User Dashboard":
         if st.button("Logout"):
             logout_user()
             st.success("Logged out successfully!")
-            st.experimental_rerun()
+            st.rerun()
         # Skill Selection and Guidelines
         st.subheader("Select Skill and View Guidelines")
         skill = st.text_input("Enter a Skill:")
@@ -226,7 +226,7 @@ elif page == "Invigilator Dashboard":
     
     # Invigilator Dashboard Content
     if is_invigilator_authenticated():
-        current_invigilator_email = get_current_user()
+        current_invigilator_email = get_current_invigilator()
         
         # Show Pending Tasks
         st.subheader("Pending Tasks")
