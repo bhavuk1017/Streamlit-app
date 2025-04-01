@@ -111,7 +111,7 @@ if page == "User Dashboard":
                 2. Learning objectives
                 3. Evaluation criteria
                 4. Recommended preparation
-                5. Important topics to focus on
+                make sure to not end the response mid-sentence. Complete the response within 700 tokens.
                 """
                 guidelines = generate_ai_response(guidelines_prompt)
                 
