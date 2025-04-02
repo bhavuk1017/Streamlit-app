@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import datetime, timedelta
+import pytz
 import hashlib
-
+timezone = pytz.timezone('Asia/Kolkata')
 from database import tasks_collection,submissions_collection
 
 from auth import (
@@ -84,15 +85,21 @@ if page == "User Dashboard":
                 else:
                     st.error("Invalid credentials")
         else:
+            # User input fields
             email = st.text_input("Enter your email")
             password = st.text_input("Enter your password", type="password")
             name = st.text_input("Enter your name")
+
+            # Button to trigger registration
             if st.button("Register"):
-                if register_user(email, password, name):
-                    st.success("User registered successfully! Please log in.")
+                # Call the register_user function and capture its response
+                response = register_user(email, password, name)
+                
+                # Check the response and display appropriate messages
+                if response["success"]:
+                    st.success(response["message"])
                 else:
-                    st.error("Registration failed. Email may already be in use.")
-    # Main Dashboard Content
+                    st.error(response["error"])
     if is_user_authenticated():
         email = get_current_user()
         if st.button("Logout"):
@@ -132,7 +139,7 @@ if page == "User Dashboard":
             )
         
             # Get the current time
-            current_time = datetime.now().time()
+            current_time = datetime.now(timezone).time()
 
             # Display the time input widget with the current time as the default value
             preferred_time = st.time_input("Select your preferred test time:")

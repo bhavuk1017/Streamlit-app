@@ -65,6 +65,7 @@
 import streamlit as st
 from database import users_collection, invigilators_collection
 from pymongo.errors import DuplicateKeyError
+from email_service import send_email 
 
 def authenticate_user(email, password):
     """Authenticate a user with email and password."""
@@ -105,17 +106,46 @@ def get_invigilator_name_by_email(email):
     invigilator = invigilators_collection.find_one({"email": email})
     return invigilator.get("name") if invigilator else None
 
+# def register_user(email, password, name):
+#     """Register a new user."""
+#     try:
+#         users_collection.insert_one({
+#             "email": email,
+#             "password": password,
+#             "name": name
+#         })
+#         return True
+#     except DuplicateKeyError:
+#         return False
+from pymongo.errors import DuplicateKeyError
+from google.auth.exceptions import GoogleAuthError
+
 def register_user(email, password, name):
-    """Register a new user."""
+    """Register a new user after verifying the email."""
     try:
+        # Attempt to send a verification email
+        subject = "Email Verification"
+        body = f"Hello {name},\n\nThank you for registering. Please verify your email address."
+        
+        if not send_email(email, subject, body):
+            return {"success": False, "error": "Invalid email address. Could not send verification email."}
+        
+        # Insert user into the database if email is valid
         users_collection.insert_one({
             "email": email,
             "password": password,
             "name": name
         })
-        return True
+        return {"success": True, "message": "User registered successfully."}
+    
     except DuplicateKeyError:
-        return False
+        return {"success": False, "error": "Email already exists. Please use a different email."}
+    
+    except GoogleAuthError as e:
+        return {"success": False, "error": f"Google Authentication Error: {str(e)}"}
+    
+    except Exception as e:
+        return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
 
 def logout_user():
     """Log out the current user."""
