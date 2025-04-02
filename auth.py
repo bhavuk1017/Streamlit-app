@@ -145,7 +145,7 @@ def register_user(email, password, name):
         return {"success": False, "error": f"Google Authentication Error: {str(e)}"}
     
     except Exception as e:
-        return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
+        return {"success": False, "error": f"An unexpected error occurred: Please enter a valid email address."}
 
 def logout_user():
     """Log out the current user."""
