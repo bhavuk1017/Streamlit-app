@@ -130,46 +130,62 @@ if page == "User Dashboard":
                 max_value=max_date,
                 value=min_date
             )
+        
+            # Get the current time
+            current_time = datetime.now().time()
+
+            # Display the time input widget with the current time as the default value
             preferred_time = st.time_input("Select your preferred test time:")
+            timecorrect=False
+            # Validate if the selected time is greater than or equal to the current time
+            if preferred_time < current_time:
+                st.error(f"Please select a time after {current_time.strftime('%H:%M')}.")
+
+            else:
+                st.success(f"Your selected time is valid: {preferred_time.strftime('%H:%M')}")
+                timecorrect=True
+
 
                             
             if st.button("Generate Test"):
-                        with st.spinner("Scheduling your test..."):
-                            # Format date as ISO string for URL
-                            formatted_date = preferred_date.strftime("%Y-%m-%d")
-                            formatted_time = preferred_time.strftime("%H:%M")
-                        
-                            # Construct the React app URL with skill, email, and date
-                            react_url = f"http://proctoringfrontend.netlify.app/test?skill={skill}&email={email}&testDate={formatted_date}&testTime={formatted_time}"
+                        if timecorrect:
+                            with st.spinner("Scheduling your test..."):
+                                # Format date as ISO string for URL
+                                formatted_date = preferred_date.strftime("%Y-%m-%d")
+                                formatted_time = preferred_time.strftime("%H:%M")
                             
-                            # Format the date for the email
-                            formatted_date1 = preferred_date.strftime("%A, %B %d, %Y")
-                            
-                            # Send email with test link and instructions
-                            email_subject = f"Your Scheduled {skill} Test"
-                            email_body = f"""
-                            Dear {email},
-                            
-                            Your test for {skill} has been scheduled for {formatted_date1} at {formatted_time}.
-                            
-                            Please click on the following link to start your test on the scheduled date:
-                            {react_url}
-                            
-                            Important instructions:
-                            - The test will be proctored
-                            - Ensure you have a working webcam
-                            - Find a quiet place without distractions
-                            - The test will last approximately 30 minutes
-                            
-                            Good luck!
-                            """
-                            
-                            # Send the email
-                            send_email(email, email_subject, email_body)
-                            
-                            st.success(f"Test scheduled for {formatted_date1} at {formatted_time}. Check your email for the test link and instructions.")
+                                # Construct the React app URL with skill, email, and date
+                                react_url = f"http://proctoringfrontend.netlify.app/test?skill={skill}&email={email}&testDate={formatted_date}&testTime={formatted_time}"
+                                
+                                # Format the date for the email
+                                formatted_date1 = preferred_date.strftime("%A, %B %d, %Y")
+                                
+                                # Send email with test link and instructions
+                                email_subject = f"Your Scheduled {skill} Test"
+                                email_body = f"""
+                                Dear {email},
+                                
+                                Your test for {skill} has been scheduled for {formatted_date1} at {formatted_time}.
+                                
+                                Please click on the following link to start your test on the scheduled date:
+                                {react_url}
+                                
+                                Important instructions:
+                                - The test will be proctored
+                                - Ensure you have a working webcam
+                                - Find a quiet place without distractions
+                                - The test will last approximately 30 minutes
+                                
+                                Good luck!
+                                """
+                                
+                                # Send the email
+                                send_email(email, email_subject, email_body)
+                                
+                                st.success(f"Test scheduled for {formatted_date1} at {formatted_time}. Check your email for the test link and instructions.")
 
-
+                        else:
+                            st.error("Please select a valid time for the test.")
 
        
         
