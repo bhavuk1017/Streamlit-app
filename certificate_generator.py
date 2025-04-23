@@ -44,7 +44,7 @@ def generate_certificate_pdf(email, skill, message):
     pdf.cell(pdf.w/2 - 20, 40, current_date, 0, 0, 'C')
     
     # Signature
-    pdf.cell(pdf.w/2 + 20, 40, 'Dr. Seema Negi', 0, 1, 'C')
+    pdf.cell(pdf.w/2 + 20, 40, 'Mr. Sudarshan Daga', 0, 1, 'C')
     
     # Labels for date and signature
     pdf.set_font('Helvetica', '', 12)
