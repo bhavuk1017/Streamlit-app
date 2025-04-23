@@ -5,12 +5,8 @@ import pytz
 
 def generate_certificate_pdf(email, skill, message):
     """Generate a PDF certificate using FPDF."""
-    # Create PDF object
     pdf = FPDF(orientation='L', format='A4')
     pdf.add_page()
-    
-    # Set default font - using built-in fonts instead of custom ones
-    pdf.set_font('Helvetica', '', 36)
     
     # Certificate border
     pdf.set_line_width(2)
@@ -18,11 +14,11 @@ def generate_certificate_pdf(email, skill, message):
     pdf.rect(15, 15, pdf.w - 30, pdf.h - 30)
     
     # Title
-    pdf.set_font('Helvetica-Bold', '', 36)
+    pdf.set_font('Helvetica', 'B', 36)
     pdf.cell(0, 40, 'OLL.co', 0, 1, 'C')
     
     # Certificate text
-    pdf.set_font('Helvetica-Bold', '', 48)
+    pdf.set_font('Helvetica', 'B', 48)
     pdf.cell(0, 30, 'CERTIFICATE', 0, 1, 'C')
     
     # Email
@@ -34,7 +30,7 @@ def generate_certificate_pdf(email, skill, message):
     pdf.cell(0, 10, 'has successfully completed', 0, 1, 'C')
     
     # Skill name
-    pdf.set_font('Helvetica-Bold', '', 24)
+    pdf.set_font('Helvetica', 'B', 24)
     pdf.cell(0, 20, skill, 0, 1, 'C')
     
     # Message
@@ -59,4 +55,4 @@ def generate_certificate_pdf(email, skill, message):
     temp_path = f"temp_certificate_{email.replace('@', '_').replace('.', '_')}.pdf"
     pdf.output(temp_path)
     
-    return temp_path 
+    return temp_path
