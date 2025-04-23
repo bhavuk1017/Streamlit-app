@@ -279,10 +279,9 @@ elif page == "Invigilator Dashboard":
                 st.write(f"Evaluation Result: {submission['evaluation']}")
                 
                 if st.button("Generate Certificate", key=button_key):
-                    # Extract skill name from the task description
+                    # Get the task title (first line after stripping markdown)
                     task_lines = submission['task'].split('\n')
-                    skill_name = next((line.strip() for line in task_lines if 'skill:' in line.lower()), 'Certification')
-                    skill_name = skill_name.replace('Skill:', '').strip()
+                    skill_name = task_lines[0].strip('*# ').replace('Certification Task:', '').replace(':', '').strip()
                     
                     # Send the PDF certificate
                     send_certificate(submission["email"], skill_name)

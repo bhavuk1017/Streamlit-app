@@ -111,10 +111,10 @@ We are pleased to inform you that you have successfully completed the certificat
 Your certificate is attached to this email. 
 
 Best regards,
-Skill Bharat Association"""
+OLL.co"""
 
     # Send email with PDF attachment
-    subject = "Your Skill Bharat Certificate"
+    subject = "Your Certification for {skill_name}"
     send_email(email, subject, body, pdf_path)
 
 def send_evaluation_result(email, evaluation_result):
