@@ -28,7 +28,7 @@ from task_manager import (
     handle_submission
 )
 from utils import generate_ai_response
-from email_service import send_email
+from email_service import send_email, send_certificate
 
 # from flask import Flask, request, jsonify
 # from flask_cors import CORS
@@ -279,9 +279,13 @@ elif page == "Invigilator Dashboard":
                 st.write(f"Evaluation Result: {submission['evaluation']}")
                 
                 if st.button("Generate Certificate", key=button_key):
-                    cert_prompt = f"Generate a professional certification document for {submission['email']} for completing the task: {submission['task']}."
-                    certificate = generate_ai_response(cert_prompt)
-                    send_email(submission["email"], "Certification Achieved!", certificate)
+                    # Extract skill name from the task description
+                    task_lines = submission['task'].split('\n')
+                    skill_name = next((line.strip() for line in task_lines if 'skill:' in line.lower()), 'Certification')
+                    skill_name = skill_name.replace('Skill:', '').strip()
+                    
+                    # Send the PDF certificate
+                    send_certificate(submission["email"], skill_name)
                     st.success("Certificate sent to user!")
 
 elif page == "Pending Tasks":
