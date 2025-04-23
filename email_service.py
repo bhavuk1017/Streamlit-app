@@ -12,7 +12,6 @@ def send_email(to_email, subject, body, attachment_path=None):
         creds = Credentials.from_authorized_user_file("token.json", ["https://www.googleapis.com/auth/gmail.send"])
         service = build("gmail", "v1", credentials=creds)
         
-        # Create message container
         message = MIMEMultipart()
         message["to"] = to_email
         message["subject"] = subject
@@ -20,31 +19,30 @@ def send_email(to_email, subject, body, attachment_path=None):
         # Add body
         message.attach(MIMEText(body))
         
-        # Add PDF attachment if provided
+        # Add attachment if provided
         if attachment_path and os.path.exists(attachment_path):
             with open(attachment_path, "rb") as f:
-                pdf = MIMEApplication(f.read(), _subtype="pdf")
-                pdf.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment_path))
-                message.attach(pdf)
+                attachment = MIMEApplication(f.read(), _subtype="pdf")
+                attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename(attachment_path))
+                message.attach(attachment)
         
         raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
         service.users().messages().send(userId="me", body={"raw": raw_message}).execute()
+        
+        # Clean up temporary file if it exists
+        if attachment_path and os.path.exists(attachment_path):
+            os.remove(attachment_path)
+            
         return True
     except Exception as e:
+        if attachment_path and os.path.exists(attachment_path):
+            os.remove(attachment_path)
         raise Exception(f"Error sending email: {str(e)}")
 
-def send_certificate(email, task_description, certificate_path):
-    """Send certification email with PDF certificate to user."""
+def send_certificate(email, task_description, certificate_content):
+    """Send certification email to user."""
     subject = "Certification Achieved!"
-    body = f"""Congratulations!
-
-We are pleased to inform you that you have successfully completed your certification.
-Your certificate is attached to this email.
-
-Best regards,
-Skill Bharat Association"""
-    
-    send_email(email, subject, body, certificate_path)
+    send_email(email, subject, certificate_content)
 
 def send_evaluation_result(email, evaluation_result):
     """Send evaluation results to invigilator."""

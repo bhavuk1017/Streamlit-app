@@ -28,8 +28,8 @@ from task_manager import (
     handle_submission
 )
 from utils import generate_ai_response
-from email_service import send_email, send_certificate
-from certificate_generator import CertificateGenerator
+from email_service import send_email
+from certificate_generator import generate_certificate_pdf
 
 # from flask import Flask, request, jsonify
 # from flask_cors import CORS
@@ -280,19 +280,45 @@ elif page == "Invigilator Dashboard":
                 st.write(f"Evaluation Result: {submission['evaluation']}")
                 
                 if st.button("Generate Certificate", key=button_key):
-                    cert_prompt = f"Generate a professional certification document for {submission['email']} for completing the task: {submission['task']}."
+                    cert_prompt = f"""Please provide the following information in exactly this format:
+SKILL: [skill name extracted from the task]
+MESSAGE: [brief congratulatory message, max 100 characters]
+
+For the task: {submission['task']}"""
+                    ai_response = generate_ai_response(cert_prompt)
                     
-                    # Generate certificate PDF
-                    certificate_gen = CertificateGenerator()
-                    certificate_path = certificate_gen.generate_certificate(
-                        submission['email'],
-                        submission['task'],  # Use the full task description instead of extracting skill
-                        "This certification acknowledges the successful demonstration of skills and competency in the specified domain."
-                    )
-                    
-                    # Send certificate via email
-                    send_certificate(submission["email"], submission['task'], certificate_path)
-                    st.success("Certificate generated and sent to user!")
+                    # Parse AI response to get skill and message
+                    try:
+                        # Extract skill and message using proper parsing
+                        skill = ""
+                        message = ""
+                        
+                        for line in ai_response.strip().split('\n'):
+                            if line.startswith('SKILL:'):
+                                skill = line.replace('SKILL:', '').strip()
+                            elif line.startswith('MESSAGE:'):
+                                message = line.replace('MESSAGE:', '').strip()
+                        
+                        if not skill:
+                            raise ValueError("Could not extract skill from AI response")
+                        
+                        # Generate PDF certificate
+                        certificate_path = generate_certificate_pdf(submission["email"], skill, message)
+                        
+                        # Send email with PDF attachment
+                        email_body = f"""
+                        Congratulations on achieving certification in {skill}!
+                        
+                        Please find your certificate attached to this email.
+                        
+                        Best regards,
+                        OLL.co Team
+                        """
+                        
+                        send_email(submission["email"], "Certification Achieved!", email_body, certificate_path)
+                        st.success("Certificate generated and sent to user!")
+                    except Exception as e:
+                        st.error(f"Error generating certificate: {str(e)}")
 
 elif page == "Pending Tasks":
     st.header("Pending Tasks")
