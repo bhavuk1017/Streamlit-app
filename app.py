@@ -303,7 +303,7 @@ For the task: {submission['task']}"""
                             raise ValueError("Could not extract skill from AI response")
                         
                         # Generate PDF certificate
-                        certificate_path = generate_certificate_pdf(submission["email"], skill, message)
+                        certificate_path = generate_certificate_pdf(submission["name"], skill, message)
                         
                         # Send email with PDF attachment
                         email_body = f"""
