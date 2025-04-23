@@ -29,6 +29,7 @@ from task_manager import (
 )
 from utils import generate_ai_response
 from email_service import send_email, send_certificate
+from certificate_generator import CertificateGenerator
 
 # from flask import Flask, request, jsonify
 # from flask_cors import CORS
@@ -279,13 +280,19 @@ elif page == "Invigilator Dashboard":
                 st.write(f"Evaluation Result: {submission['evaluation']}")
                 
                 if st.button("Generate Certificate", key=button_key):
-                    # Get the task title (first line after stripping markdown)
-                    task_lines = submission['task'].split('\n')
-                    skill_name = task_lines[0].strip('*# ').replace('Certification Task:', '').replace(':', '').strip()
+                    cert_prompt = f"Generate a professional certification document for {submission['email']} for completing the task: {submission['task']}."
                     
-                    # Send the PDF certificate
-                    send_certificate(submission["email"], skill_name)
-                    st.success("Certificate sent to user!")
+                    # Generate certificate PDF
+                    certificate_gen = CertificateGenerator()
+                    certificate_path = certificate_gen.generate_certificate(
+                        submission['email'],
+                        submission['task'],  # Use the full task description instead of extracting skill
+                        "This certification acknowledges the successful demonstration of skills and competency in the specified domain."
+                    )
+                    
+                    # Send certificate via email
+                    send_certificate(submission["email"], submission['task'], certificate_path)
+                    st.success("Certificate generated and sent to user!")
 
 elif page == "Pending Tasks":
     st.header("Pending Tasks")
